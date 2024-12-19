@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+                      <link rel="icon" type="image/x-icon" href="https://shorturl.at/yxoxG">
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LYA - Dashboard</title>
+  <script src="auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="auth.js"></script>
+  <style>
+
+
+@import url('https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&display=swap');
+
+
+
+
+    /* Styles as before */
+    * { margin: 0; padding: 0; box-sizing: border-box;   font-family: "Hind Siliguri", serif; }
+    body { display: flex; min-height: 100vh; background-color: #f7f7f8; }
+    .sidebar { width: 250px; background-color: #f7f7f8; padding: 20px; border-right: 1px solid #ddd; }
+    .logo { font-size: 24px; font-weight: bold; color: #333; margin-bottom: 20px; }
+    .sidebar nav a { display: flex; align-items: center; padding: 10px; color: #333; text-decoration: none; transition: background-color 0.3s; border-radius: 5px; margin-bottom: 10px; }
+    .sidebar nav a:hover, .sidebar nav .active { background-color: #e3e3e3; }
+    .main-content { flex: 1; padding: 20px; background-color: #ffffff; }
+    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .search-bar { display: flex; align-items: center; background-color: #f0f0f0; padding: 10px; border-radius: 5px; width: 60%; }
+    .search-bar input { border: none; background: none; width: 100%; outline: none; padding: 5px; }
+    .header-icons { display: flex; align-items: center; }
+    .header-icons img { width: 24px; margin-left: 15px; cursor: pointer; }
+    .table-container { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; background-color: #fff; }
+    table th, table td { padding: 15px; border-bottom: 1px solid #ddd; text-align: left; font-size: 14px; color: #333; }
+    table th { background-color: #f0f0f0; font-weight: bold; }
+
+    /* Logo Section */
+    .logo {
+        margin-bottom: 20px;
+    }
+
+    .logo img {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+    }
+  </style>
+</head>
+<body>
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="logo">
+        <img src="https://i.postimg.cc/nLRNYjnt/LYA-Logo.png" alt="BHOLA GYMnasium Logo">
+    </div>
+    <nav>
+      <a href="genarel-application.html" class="active"">৬ষ্ঠ থেকে ৮ম শ্রেণী আবেদন</a>
+      <a href="ssc-application.html">এসএসসি শিক্ষার্থী আবেদন</a>
+      <a href="hsc-application.html">এইচএসসি  শিক্ষার্থী আবেদন</a>
+      <a href="#">লগআউট</a>
+    </nav>
+  </aside>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <!-- Header -->
+    <header class="header">
+      <div class="search-bar">
+        <input type="text" id="searchInput" placeholder="Search for something" oninput="filterTable()">
+      </div>
+      <div class="header-icons">
+        <img src="https://img.icons8.com/ios-glyphs/30/settings.png" alt="Settings">
+        <img src="https://img.icons8.com/ios-glyphs/30/appointment-reminders.png" alt="Notifications">
+        <img src="https://img.icons8.com/ios-glyphs/30/user.png" alt="Profile">
+      </div>
+    </header>
+
+    <!-- Table Section -->
+    <section class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>আবেদনের তারিখ</th>
+            <th>শিক্ষার্থীর নাম</th>
+             <th>মোবাইল নাম্বার</th>
+             <th>শিক্ষার্থীর গ্রুপ</th>
+             <th>কলেজের নাম</th>
+            
+          </tr>
+        </thead>
+        <tbody id="table-body">
+          <!-- Rows will be dynamically inserted here by JavaScript -->
+        </tbody>
+      </table>
+    </section>
+  </div>
+
+  <script>
+    // Google Sheets API URL
+    const sheetId = "1wz56N1PM3C7GyEqr67hv3zjtPJPqE7W5DLj7CmGm8r0";
+    const apiKey = "AIzaSyBvShpNn-4av3KWuQuUdmhl3S54rw2JFZY";
+    const sheetName = "general"; // Change to your sheet's name
+    const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${sheetName}?key=${apiKey}`;
+
+    // Fetch data from Google Sheets
+    async function fetchSheetData() {
+      try {
+        const response = await fetch(url);
+        const data = await response.json();
+        populateTable(data.values);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    }
+
+    // Populate table with data
+    function populateTable(data) {
+      const tableBody = document.getElementById("table-body");
+      tableBody.innerHTML = ""; // Clear existing data
+
+      data.slice(1).forEach(row => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+         <td>${row[0]}</td>
+          <td>${row[1]}</td>
+          <td>${row[2]}</td>
+          <td>${row[3]}</td>
+          <td>${row[4]}</td>
+        `;
+        tableBody.appendChild(tr);
+      });
+    }
+
+    // Filter table based on search input
+    function filterTable() {
+      const searchInput = document.getElementById("searchInput").value.toLowerCase();
+      const rows = document.querySelectorAll("#table-body tr");
+
+      rows.forEach(row => {
+        const cells = row.querySelectorAll("td");
+        const rowText = Array.from(cells).map(cell => cell.textContent.toLowerCase()).join(" ");
+        row.style.display = rowText.includes(searchInput) ? "" : "none";
+      });
+    }
+
+    // Initialize data fetch
+    fetchSheetData();
+  </script>
+</body>
+</html>
